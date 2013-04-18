@@ -2,6 +2,8 @@ package com.googlecode.chmcreator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -14,6 +16,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
@@ -40,7 +43,7 @@ public class Application {
 	public final static Shell shell = new Shell(display);
 
 	public static CTabFolder tabEditor = null;
-	
+	public static Map<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
 	public Application(){
 		shell.setLayout (new FillLayout());
 		shell.setSize(display.getClientArea().width-60, display.getClientArea().height-60);
@@ -189,12 +192,13 @@ public class Application {
 		for (int i = 0; i < count; i++) {
 			CTabItem item = new CTabItem(folder, SWT.CLOSE);
 			item.setText("Item "+i);
-			item.setImage(image);
+			item.setImage(getImage("workset.gif"));
 			Text text = new Text(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 			text.setText("Text for item "+i+"\n\none, two, three\n\nabcdefghijklmnop");
 			item.setControl(text);
 		}
 		folder.setMinimizeVisible(true);
+		folder.setTabHeight(30);
 		folder.setMaximizeVisible(true);
 		folder.addCTabFolder2Listener(new CTabFolder2Adapter() {
 			public void minimize(CTabFolderEvent event) {
@@ -214,6 +218,16 @@ public class Application {
 		folder.setSelection(0);
 	}
 	
+
+	public static Image getImage(String fileName){
+		Image img = imagesMap.get(fileName);
+		if(img!=null)
+			return img;
+		ImageLoader loader = new ImageLoader();
+		img = new Image(display,loader.load(Application.class.getResourceAsStream("/"+ fileName))[0]);
+			imagesMap.put(fileName, img);
+		return img;
+	}
 	public static void createConsoleTab(final Image image, final Composite parent, int count){
 		final CTabFolder folder = new CTabFolder(parent, SWT.BORDER);
 		folder.setSimple(false);
@@ -223,13 +237,15 @@ public class Application {
 		for (int i = 0; i < count; i++) {
 			CTabItem item = new CTabItem(folder, SWT.CLOSE);
 			item.setText("Console");
-			item.setImage(image);
+			//
+			item.setImage(getImage("console_view.gif"));
 			Text text = new Text(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 			text.setText("Text for item "+i+"\n\none, two, three\n\nabcdefghijklmnop");
 			item.setControl(text);
 		}
 		folder.setMinimizeVisible(true);
 		folder.setMaximizeVisible(true);
+		folder.setTabHeight(30);
 		folder.addCTabFolder2Listener(new CTabFolder2Adapter() {
 			public void minimize(CTabFolderEvent event) {
 				folder.setMinimized(true);
