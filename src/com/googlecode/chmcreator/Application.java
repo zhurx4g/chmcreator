@@ -77,7 +77,7 @@ public class Application {
 		//console
 		Composite consoleParent = new Composite(editorArea,SWT.NONE);
 		consoleParent.setLayout(new FillLayout());
-		addTab(getImage(display),consoleParent, 2);
+		createConsoleTab(getImage(display),consoleParent, 1);
 		editorArea.setWeights(new int[] {70, 30});
 
 		framework.setWeights(new int[] {20,80});
@@ -190,7 +190,7 @@ public class Application {
 			CTabItem item = new CTabItem(folder, SWT.CLOSE);
 			item.setText("Item "+i);
 			item.setImage(image);
-			Text text = new Text(folder, SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+			Text text = new Text(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 			text.setText("Text for item "+i+"\n\none, two, three\n\nabcdefghijklmnop");
 			item.setControl(text);
 		}
@@ -214,15 +214,50 @@ public class Application {
 		folder.setSelection(0);
 	}
 	
+	public static void createConsoleTab(final Image image, final Composite parent, int count){
+		final CTabFolder folder = new CTabFolder(parent, SWT.BORDER);
+		folder.setSimple(false);
+		folder.setBorderVisible(true);
+		folder.setUnselectedImageVisible(true);
+		folder.setUnselectedCloseVisible(true);
+		for (int i = 0; i < count; i++) {
+			CTabItem item = new CTabItem(folder, SWT.CLOSE);
+			item.setText("Console");
+			item.setImage(image);
+			Text text = new Text(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+			text.setText("Text for item "+i+"\n\none, two, three\n\nabcdefghijklmnop");
+			item.setControl(text);
+		}
+		folder.setMinimizeVisible(true);
+		folder.setMaximizeVisible(true);
+		folder.addCTabFolder2Listener(new CTabFolder2Adapter() {
+			public void minimize(CTabFolderEvent event) {
+				folder.setMinimized(true);
+				parent.layout(true);
+			}
+			public void maximize(CTabFolderEvent event) {
+				folder.setMaximized(true);
+				parent.layout(true);
+			}
+			public void restore(CTabFolderEvent event) {
+				folder.setMinimized(false);
+				folder.setMaximized(false);
+				parent.layout(true);
+			}
+		});
+		folder.setSelection(0);
+	}
 	public void addEditor(final Image image, String fileName){
 		CTabItem item = new CTabItem(tabEditor, SWT.CLOSE);
 		item.setImage(image);
 		File file = new File(fileName);
 		item.setText(file.getName());
 		item.setToolTipText(fileName);
-		Text text = new Text(tabEditor, SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		RichText text = new RichText(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		try {
-			text.setText(FileUtils.readFileToString(file, "utf-8"));
+//			text.setData();
+			text.setFormattedText(FileUtils.readFileToString(file, "utf-8"));
+			//text.setText();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
