@@ -1,9 +1,8 @@
 package com.googlecode.chmcreator;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -14,17 +13,13 @@ import org.eclipse.swt.custom.CTabFolderEvent;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageLoader;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.CoolBar;
-import org.eclipse.swt.widgets.CoolItem;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -34,20 +29,29 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 public class Application {
 
-	public final static Display display = new Display ();
+	public final static Display display = Display.getDefault();
 	public final static Shell shell = new Shell(display);
 
 	public static CTabFolder tabEditor = null;
-	public static Map<String, Image> imagesMap = new ConcurrentHashMap<String, Image>();
+	
+	public static List<Project> projectList = new ArrayList<Project>();
+	
+	public static synchronized void setTitle(String title){
+		if(StringUtils.isBlank(title)){
+			shell.setText("Chmcreator");
+		}else{
+			shell.setText("Chmcreator - " + title);
+		}
+	}
 	public Application(){
 		shell.setLayout (new FillLayout());
 		shell.setSize(display.getClientArea().width-60, display.getClientArea().height-60);
-		
+		setTitle("");
 		//menu
 		Menu menuBar = createMenu();
 		shell.setMenuBar (menuBar);
@@ -56,7 +60,7 @@ public class Application {
 		application.setLayout(new FormLayout());
 
 		//toolbar
-		CoolBar coolBar = createBar(application);
+		CoolBar coolBar = new ToolBarBuilder(application).build();
 
 		//workspace
 		Composite workspace = createWorkspace(application,coolBar);
@@ -68,7 +72,7 @@ public class Application {
 		//navgator
 		Composite navgator = new Composite(framework,SWT.NONE);
 		navgator.setLayout(new FillLayout());
-		addTab(getImage(display),navgator, 1);
+		addTab(getImage("java.gif"),navgator, 1);
 		
 		//editorArea
 		SashForm editorArea = new SashForm(framework,SWT.VERTICAL);
@@ -80,7 +84,7 @@ public class Application {
 		//console
 		Composite consoleParent = new Composite(editorArea,SWT.NONE);
 		consoleParent.setLayout(new FillLayout());
-		createConsoleTab(getImage(display),consoleParent, 1);
+		createConsoleTab(getImage("java.gif"),consoleParent, 1);
 		editorArea.setWeights(new int[] {70, 30});
 
 		framework.setWeights(new int[] {20,80});
@@ -96,34 +100,10 @@ public class Application {
 		}
 		display.dispose ();
 	}
-	
-	public static Image getImage(final Display display){
-		Image image = new Image(display, 28, 28);
-		GC gc = new GC(image);
-		gc.setBackground(display.getSystemColor(SWT.COLOR_BLUE));
-		gc.fillRectangle(0, 0, 28, 28);
-		gc.setBackground(display.getSystemColor(SWT.COLOR_YELLOW));
-		gc.fillRectangle(3, 3, 22, 22);
-		gc.dispose();
-		return image;
+	public static Image getImage(String string) {
+		return ResourceLoader.getImage(string);
 	}
-	
-	static int itemCount;
-	CoolItem createItem(CoolBar coolBar, int count) {
-	    ToolBar toolBar = new ToolBar(coolBar, SWT.FLAT);
-	    for (int i = 0; i < count; i++) {
-	        ToolItem item = new ToolItem(toolBar, SWT.PUSH);
-	        item.setImage(getImage(display));
-	        item.setToolTipText(itemCount++ +"");
-	    }
-	    toolBar.pack();
-	    Point size = toolBar.getSize();
-	    CoolItem item = new CoolItem(coolBar, SWT.NONE);
-	    item.setControl(toolBar);
-	    Point preferred = item.computeSize(size.x, size.y);
-	    item.setPreferredSize(preferred);
-	    return item;
-	}
+
 	
 	public Menu createMenu(){
 		Menu bar = new Menu (shell, SWT.BAR);
@@ -131,6 +111,27 @@ public class Application {
 		fileItem.setText ("&File");
 		Menu submenu = new Menu (shell, SWT.DROP_DOWN);
 		fileItem.setMenu (submenu);
+		
+		MenuItem newProject = new MenuItem (submenu, SWT.PUSH);
+		newProject.addListener (SWT.Selection, new Listener () {
+			public void handleEvent (Event e) {
+				DirectoryDialog dialog = new DirectoryDialog (shell);
+				String platform = SWT.getPlatform();
+				dialog.setFilterPath (platform.equals("win32") || platform.equals("wpf") ? "c:\\" : "/");
+				String fileName = dialog.open();
+				if(StringUtils.isNotBlank(fileName)){
+					File file = new File(fileName);
+					Project project = new Project(fileName,file.getName());
+					projectList.add(project);
+					TreeItem iItem = new TreeItem (tree, 0);
+					iItem.setText (file.getName());
+					iItem.setImage(getImage("projects.gif"));
+				}
+			}
+
+		});
+		newProject.setText ("&New Project\tCtrl+N");
+		newProject.setAccelerator (SWT.MOD1 + 'N');
 		
 		MenuItem open = new MenuItem (submenu, SWT.PUSH);
 		open.addListener (SWT.Selection, new Listener () {
@@ -140,7 +141,7 @@ public class Application {
 				dialog.setFilterPath (platform.equals("win32") || platform.equals("wpf") ? "c:\\" : "/");
 				String fileName = dialog.open();
 				if(StringUtils.isNotBlank(fileName)){
-					addEditor(getImage(display), fileName);
+					addEditor(getImage("java.gif"), fileName);
 				}
 			}
 		});
@@ -158,16 +159,6 @@ public class Application {
 		return bar;
 	}
 	
-	public CoolBar createBar(final Composite application){
-	    CoolBar coolBar = new CoolBar(application, SWT.NONE);
-	    createItem(coolBar, 3);
-	    createItem(coolBar, 2);
-	    createItem(coolBar, 3);
-	    createItem(coolBar, 4);
-	    
-	    return coolBar;
-	}
-	
 	public Composite createWorkspace(final Composite application, final Composite attachment){
 	    int style = SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL;
 	    //Text text = new Text(application, style);
@@ -183,6 +174,7 @@ public class Application {
 	    
 	    return workspace;
 	}
+	static Tree tree;
 	public static void addTab(final Image image, final Composite parent, int count){
 		final CTabFolder folder = new CTabFolder(parent, SWT.BORDER);
 		folder.setSimple(false);
@@ -191,11 +183,33 @@ public class Application {
 		folder.setUnselectedCloseVisible(true);
 		for (int i = 0; i < count; i++) {
 			CTabItem item = new CTabItem(folder, SWT.CLOSE);
-			item.setText("Item "+i);
+			item.setText("Project Explore");
 			item.setImage(getImage("workset.gif"));
-			Text text = new Text(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-			text.setText("Text for item "+i+"\n\none, two, three\n\nabcdefghijklmnop");
-			item.setControl(text);
+			//Text text = new Text(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+			//text.setText("ss");
+			
+			tree = new Tree (folder, SWT.BORDER);
+			for (int ix=0; ix<4; ix++) {
+				TreeItem iItem = new TreeItem (tree, 0);
+				iItem.setText ("工程" + ix);
+				iItem.setImage(getImage("projects.gif"));
+				for (int j=0; j<4; j++) {
+					TreeItem jItem = new TreeItem (iItem, 0);
+					jItem.setText ("文件夹" + j);//
+					jItem.setImage(getImage("fldr_obj.gif"));
+					for (int k=0; k<4; k++) {
+						TreeItem kItem = new TreeItem (jItem, 0);
+						kItem.setText ("文件夹" + k);
+						kItem.setImage(getImage("fldr_obj.gif"));
+						for (int l=0; l<4; l++) {
+							TreeItem lItem = new TreeItem (kItem, 0);
+							lItem.setText ("文件" + l);
+							lItem.setImage(getImage("jcu_obj.gif"));
+						}
+					}
+				}
+			}
+			item.setControl(tree);
 		}
 		folder.setMinimizeVisible(true);
 		folder.setTabHeight(30);
@@ -219,15 +233,6 @@ public class Application {
 	}
 	
 
-	public static Image getImage(String fileName){
-		Image img = imagesMap.get(fileName);
-		if(img!=null)
-			return img;
-		ImageLoader loader = new ImageLoader();
-		img = new Image(display,loader.load(Application.class.getResourceAsStream("/"+ fileName))[0]);
-			imagesMap.put(fileName, img);
-		return img;
-	}
 	public static void createConsoleTab(final Image image, final Composite parent, int count){
 		final CTabFolder folder = new CTabFolder(parent, SWT.BORDER);
 		folder.setSimple(false);
@@ -269,14 +274,13 @@ public class Application {
 		File file = new File(fileName);
 		item.setText(file.getName());
 		item.setToolTipText(fileName);
-		RichText text = new RichText(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		Text text = new Text(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		try {
-//			text.setData();
-			text.setFormattedText(FileUtils.readFileToString(file, "utf-8"));
-			//text.setText();
+			text.setText(FileUtils.readFileToString(file, "utf-8"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		setTitle(file.getName());
 		item.setControl(text);
 		
 		tabEditor.setSelection(item);
