@@ -52,15 +52,14 @@ public class Application {
 		item.setAccelerator (SWT.MOD1 + 'A');
 		
 		Composite application = new Composite(shell,SWT.NONE);
-		FormLayout layout = new FormLayout();
-		application.setLayout(layout);
+		application.setLayout(new FormLayout());
 
 		//toolbar
 		CoolBar coolBar = createBar(application);
 
 		//workspace
 		Composite workspace = createWorkspace(application,coolBar);
-	    
+		
 		//framework
 		SashForm framework = new SashForm(workspace,SWT.HORIZONTAL);
 		framework.setLayout(new FillLayout());
