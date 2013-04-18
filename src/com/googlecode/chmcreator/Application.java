@@ -1,5 +1,10 @@
 package com.googlecode.chmcreator;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabFolder2Adapter;
@@ -17,8 +22,10 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.CoolItem;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -29,27 +36,18 @@ import org.eclipse.swt.widgets.ToolItem;
 
 public class Application {
 
-	final Display display = new Display ();
-	Shell shell = new Shell(display);
+	public final static Display display = new Display ();
+	public final static Shell shell = new Shell(display);
 
+	public static CTabFolder tabEditor = null;
+	
 	public Application(){
 		shell.setLayout (new FillLayout());
 		shell.setSize(display.getClientArea().width-60, display.getClientArea().height-60);
 		
-		Menu bar = new Menu (shell, SWT.BAR);
-		shell.setMenuBar (bar);
-		MenuItem fileItem = new MenuItem (bar, SWT.CASCADE);
-		fileItem.setText ("&File");
-		Menu submenu = new Menu (shell, SWT.DROP_DOWN);
-		fileItem.setMenu (submenu);
-		MenuItem item = new MenuItem (submenu, SWT.PUSH);
-		item.addListener (SWT.Selection, new Listener () {
-			public void handleEvent (Event e) {
-				System.out.println ("Select All");
-			}
-		});
-		item.setText ("Select &All\tCtrl+A");
-		item.setAccelerator (SWT.MOD1 + 'A');
+		//menu
+		Menu menuBar = createMenu();
+		shell.setMenuBar (menuBar);
 		
 		Composite application = new Composite(shell,SWT.NONE);
 		application.setLayout(new FormLayout());
@@ -74,7 +72,7 @@ public class Application {
 		//editor
 		Composite editorParent = new Composite(editorArea,SWT.NONE);
 		editorParent.setLayout(new FillLayout());
-		addTab(getImage(display),editorParent, 3);
+		tabEditor = createTabEditor(editorParent);
 		
 		//console
 		Composite consoleParent = new Composite(editorArea,SWT.NONE);
@@ -123,6 +121,40 @@ public class Application {
 	    item.setPreferredSize(preferred);
 	    return item;
 	}
+	
+	public Menu createMenu(){
+		Menu bar = new Menu (shell, SWT.BAR);
+		MenuItem fileItem = new MenuItem (bar, SWT.CASCADE);
+		fileItem.setText ("&File");
+		Menu submenu = new Menu (shell, SWT.DROP_DOWN);
+		fileItem.setMenu (submenu);
+		
+		MenuItem open = new MenuItem (submenu, SWT.PUSH);
+		open.addListener (SWT.Selection, new Listener () {
+			public void handleEvent (Event e) {
+				FileDialog dialog = new FileDialog (shell);
+				String platform = SWT.getPlatform();
+				dialog.setFilterPath (platform.equals("win32") || platform.equals("wpf") ? "c:\\" : "/");
+				String fileName = dialog.open();
+				if(StringUtils.isNotBlank(fileName)){
+					addEditor(getImage(display), fileName);
+				}
+			}
+		});
+		open.setText ("&Open\tCtrl+O");
+		open.setAccelerator (SWT.MOD1 + 'O');
+		
+		MenuItem item = new MenuItem (submenu, SWT.PUSH);
+		item.addListener (SWT.Selection, new Listener () {
+			public void handleEvent (Event e) {
+				System.out.println ("Select All");
+			}
+		});
+		item.setText ("Select &All\tCtrl+A");
+		item.setAccelerator (SWT.MOD1 + 'A');
+		return bar;
+	}
+	
 	public CoolBar createBar(final Composite application){
 	    CoolBar coolBar = new CoolBar(application, SWT.NONE);
 	    createItem(coolBar, 3);
@@ -180,5 +212,48 @@ public class Application {
 			}
 		});
 		folder.setSelection(0);
+	}
+	
+	public void addEditor(final Image image, String fileName){
+		CTabItem item = new CTabItem(tabEditor, SWT.CLOSE);
+		item.setImage(image);
+		File file = new File(fileName);
+		item.setText(file.getName());
+		item.setToolTipText(fileName);
+		Text text = new Text(tabEditor, SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		try {
+			text.setText(FileUtils.readFileToString(file, "utf-8"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		item.setControl(text);
+		
+		tabEditor.setSelection(item);
+	}
+	public static CTabFolder createTabEditor(final Composite parent){
+		final CTabFolder folder = new CTabFolder(parent, SWT.BORDER);
+		folder.setSimple(false);
+		folder.setBorderVisible(true);
+		folder.setUnselectedImageVisible(true);
+		folder.setUnselectedCloseVisible(true);
+		folder.setTabHeight(30);
+		folder.setMinimizeVisible(true);
+		folder.setMaximizeVisible(true);
+		folder.addCTabFolder2Listener(new CTabFolder2Adapter() {
+			public void minimize(CTabFolderEvent event) {
+				folder.setMinimized(true);
+				parent.layout(true);
+			}
+			public void maximize(CTabFolderEvent event) {
+				folder.setMaximized(true);
+				parent.layout(true);
+			}
+			public void restore(CTabFolderEvent event) {
+				folder.setMinimized(false);
+				folder.setMaximized(false);
+				parent.layout(true);
+			}
+		});
+		return folder;
 	}
 }
