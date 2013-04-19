@@ -60,7 +60,9 @@ public class ProjectBuilder {
 		    tf.transform(source, result);
 		} catch (Exception e) {
 			e.printStackTrace();
+			return;
 		}
+		project.setOpen(true);
 	}
 	
 	private void parseDir(FileEntry parentEntry, Document document, Element parent, File dir){
