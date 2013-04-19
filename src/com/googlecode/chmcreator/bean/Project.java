@@ -1,13 +1,13 @@
-package com.googlecode.chmcreator;
+package com.googlecode.chmcreator.bean;
 
 public class Project {
 
 	private String name;
 	private String path;
 
-	public Project(String path, String name){
-		this.path = path;
+	public Project(String name, String path){
 		this.name = name;
+		this.path = path;
 	}
 	
 	public String getPath() {

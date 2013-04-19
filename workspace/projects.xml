@@ -1,4 +1,10 @@
 <projects>
-	<project name="" path="">
+	<project name="Project1中文" path="projectPath1">
+	</project>
+	<project name="Project2" path="projectPath2">
+	</project>
+	<project name="Project3" path="projectPath3">
+	</project>
+	<project name="Project4" path="projectPath4">
 	</project>
 </projects>

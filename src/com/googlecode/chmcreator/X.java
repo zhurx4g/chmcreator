@@ -1,67 +1,60 @@
 package com.googlecode.chmcreator;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ScrollBar;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 public class X {
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Display display = new Display ();
-		Shell shell = new Shell (display);
-		shell.setLayout(new FillLayout());
-
-		final ScrolledComposite sc1 = new ScrolledComposite (shell, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		Button button1 = new Button (sc1, SWT.PUSH);
-		button1.setText ("Button 1");
-		button1.setSize (400, 300);
-		sc1.setContent (button1);
-
-		final ScrolledComposite sc2 = new ScrolledComposite (shell, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		Button button2 = new Button(sc2, SWT.PUSH);
-		button2.setText ("Button 2");
-		button2.setSize (300, 400);
-		sc2.setContent (button2);
-
-		final ScrollBar vBar1 = sc1.getVerticalBar ();
-		final ScrollBar vBar2 = sc2.getVerticalBar ();
-		final ScrollBar hBar1 = sc1.getHorizontalBar ();
-		final ScrollBar hBar2 = sc2.getHorizontalBar ();
-		SelectionListener listener1 = new SelectionAdapter () {
-			public void widgetSelected (SelectionEvent e) {
-				int x =  hBar1.getSelection() * (hBar2.getMaximum() - hBar2.getThumb()) / Math.max(1, hBar1.getMaximum() - hBar1.getThumb());
-				int y =  vBar1.getSelection() * (vBar2.getMaximum() - vBar2.getThumb()) / Math.max(1, vBar1.getMaximum() - vBar1.getThumb());
-				sc2.setOrigin (x, y);
-			}
-		};
-		SelectionListener listener2 = new SelectionAdapter () {
-			public void widgetSelected (SelectionEvent e) {
-				int x =  hBar2.getSelection() * (hBar1.getMaximum() - hBar1.getThumb()) / Math.max(1, hBar2.getMaximum() - hBar2.getThumb());
-				int y =  vBar2.getSelection() * (vBar1.getMaximum() - vBar1.getThumb()) / Math.max(1, vBar2.getMaximum() - vBar2.getThumb());
-				sc1.setOrigin (x, y);
-			}
-		};
-		vBar1.addSelectionListener (listener1);
-		hBar1.addSelectionListener (listener1);
-		vBar2.addSelectionListener (listener2);
-		hBar2.addSelectionListener (listener2);
-
-		shell.setSize (400, 300);
-		shell.open ();
-		while (!shell.isDisposed ()) {
-			if (!display.readAndDispatch ()) display.sleep ();
-		}
-		display.dispose ();
-	}
-
+    public static void main(String[] args) {
+    	Display display = new Display ();
+    	Shell shell = new Shell (display);
+    	final Tree tree = new Tree (shell, SWT.BORDER | SWT.MULTI);
+    	final Menu menu = new Menu (shell, SWT.POP_UP);
+    	tree.setMenu (menu);
+    	for (int i=0; i<12; i++) {
+    		TreeItem treeItem = new TreeItem (tree, SWT.NONE);
+    		treeItem.setText ("Item " + i);
+    		MenuItem menuItem = new MenuItem (menu, SWT.PUSH);
+    		menuItem.setText (treeItem.getText ());
+    	}
+    	menu.addListener (SWT.Show, new Listener () {
+    		public void handleEvent (Event event) {
+    			MenuItem [] menuItems = menu.getItems ();
+    			TreeItem [] treeItems = tree.getSelection ();
+    			for (int i=0; i<menuItems.length; i++) {
+    				String text = menuItems [i].getText ();
+    				int index = 0;
+    				while (index<treeItems.length) {
+    					if (treeItems [index].getText ().equals (text)) break;
+    					index++;
+    				}
+    				menuItems [i].setEnabled (index != treeItems.length);
+    			}
+    		}
+    	});
+    	Rectangle clientArea = shell.getClientArea ();
+    	tree.setBounds (clientArea.x, clientArea.y, 200, 200);
+    	shell.setSize (300, 300);
+    	shell.open ();
+    	while (!shell.isDisposed ()) {
+    		if (!display.readAndDispatch ()) display.sleep ();
+    	}
+    	display.dispose ();
+    }
 }

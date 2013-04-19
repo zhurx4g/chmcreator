@@ -1,11 +1,9 @@
 package com.googlecode.chmcreator;
 
+import java.awt.Cursor;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Semaphore;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -27,7 +25,6 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.CoolBar;
-import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -40,6 +37,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipsian.swt.composer.HyperComposer;
+
+import com.googlecode.chmcreator.bean.Project;
+import com.googlecode.chmcreator.bean.Workspace;
+import com.googlecode.chmcreator.builder.ToolBarBuilder;
+import com.googlecode.chmcreator.builder.WorkspaceBuilder;
 
 public class Application {
 
@@ -48,16 +51,15 @@ public class Application {
 
 	public static CTabFolder tabEditor = null;
 	
-	public static List<Project> projectList = new ArrayList<Project>();
+	public static Tree workspaceTree;
+	public static Workspace workspace = null;
 	
 	public static Properties settings = new Properties();
 
 	public Application(){
-		//load settings
-		loadSettings();
+		loadSettings();//load settings
 		
-		//create UI
-		createUI();
+		createUI();//create UI
 	}
 
 	public void createUI(){
@@ -85,7 +87,7 @@ public class Application {
 		//navgator
 		Composite navgator = new Composite(framework,SWT.NONE);
 		navgator.setLayout(new FillLayout());
-		addTab(getImage("java.gif"),navgator, 1);
+		addNavgatorTab(getImage("java.gif"),navgator, 1);
 		
 		//editorArea
 		SashForm editorArea = new SashForm(framework,SWT.VERTICAL);
@@ -110,6 +112,10 @@ public class Application {
 		if(StringUtils.isBlank(workspacePath)){
 				switchWorkspace();
 		}
+		
+		workspacePath = settings.getProperty("workspace.path");
+		workspace = new WorkspaceBuilder(workspacePath).build(workspaceTree);
+		
 		shell.open ();
 		while (!shell.isDisposed ()) {
 			if (!display.readAndDispatch ()) display.sleep ();
@@ -162,7 +168,7 @@ public class Application {
 		}
 	}
 	public Menu createMenu(){
-		Menu bar = new Menu (shell, SWT.BAR);
+		Menu bar = new Menu (shell, SWT.BAR|SWT.EMBEDDED);
 		MenuItem fileItem = new MenuItem (bar, SWT.CASCADE);
 		fileItem.setText ("&File");
 		Menu submenu = new Menu (shell, SWT.DROP_DOWN);
@@ -178,8 +184,8 @@ public class Application {
 				if(StringUtils.isNotBlank(fileName)){
 					File file = new File(fileName);
 					Project project = new Project(fileName,file.getName());
-					projectList.add(project);
-					TreeItem iItem = new TreeItem (tree, 0);
+					workspace.add(project);
+					TreeItem iItem = new TreeItem (workspaceTree, 0);
 					iItem.setText (file.getName());
 					iItem.setImage(getImage("projects.gif"));
 				}
@@ -230,8 +236,8 @@ public class Application {
 	    
 	    return workspace;
 	}
-	static Tree tree;
-	public static void addTab(final Image image, final Composite parent, int count){
+	
+	public static void addNavgatorTab(final Image image, final Composite parent, int count){
 		final CTabFolder folder = new CTabFolder(parent, SWT.BORDER);
 		folder.setSimple(false);
 		folder.setBorderVisible(true);
@@ -241,31 +247,9 @@ public class Application {
 			CTabItem item = new CTabItem(folder, SWT.CLOSE);
 			item.setText("Project Explore");
 			item.setImage(getImage("workset.gif"));
-			//Text text = new Text(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-			//text.setText("ss");
 			
-			tree = new Tree (folder, SWT.BORDER);
-			for (int ix=0; ix<4; ix++) {
-				TreeItem iItem = new TreeItem (tree, 0);
-				iItem.setText ("工程" + ix);
-				iItem.setImage(getImage("projects.gif"));
-				for (int j=0; j<4; j++) {
-					TreeItem jItem = new TreeItem (iItem, 0);
-					jItem.setText ("文件夹" + j);//
-					jItem.setImage(getImage("fldr_obj.gif"));
-					for (int k=0; k<4; k++) {
-						TreeItem kItem = new TreeItem (jItem, 0);
-						kItem.setText ("文件夹" + k);
-						kItem.setImage(getImage("fldr_obj.gif"));
-						for (int l=0; l<4; l++) {
-							TreeItem lItem = new TreeItem (kItem, 0);
-							lItem.setText ("文件" + l);
-							lItem.setImage(getImage("jcu_obj.gif"));
-						}
-					}
-				}
-			}
-			item.setControl(tree);
+			workspaceTree = new Tree (folder, SWT.BORDER);
+			item.setControl(workspaceTree);
 		}
 		folder.setMinimizeVisible(true);
 		folder.setTabHeight(30);
@@ -330,14 +314,15 @@ public class Application {
 		File file = new File(fileName);
 		item.setText(file.getName());
 		item.setToolTipText(fileName);
-		Text text = new Text(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		HyperComposer composer = new HyperComposer(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		item.setControl(composer);
+		composer.setCursor(Cursor.TEXT_CURSOR);
 		try {
-			text.setText(FileUtils.readFileToString(file, "utf-8"));
+			composer.setContent(FileUtils.readFileToString(file, "utf-8"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		setTitle(file.getName());
-		item.setControl(text);
 		
 		tabEditor.setSelection(item);
 	}
