@@ -25,22 +25,16 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.CoolBar;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipsian.swt.composer.HyperComposer;
 
-import com.googlecode.chmcreator.bean.Project;
 import com.googlecode.chmcreator.bean.Workspace;
+import com.googlecode.chmcreator.builder.MenubarBuilder;
 import com.googlecode.chmcreator.builder.ToolBarBuilder;
 import com.googlecode.chmcreator.builder.WorkspaceBuilder;
 
@@ -68,7 +62,7 @@ public class Application {
 		setTitle(settings.getProperty("title"));
 		
 		//menu
-		Menu menuBar = createMenu();
+		Menu menuBar = MenubarBuilder.createMenu(display, shell);
 		shell.setMenuBar (menuBar);
 		
 		Composite application = new Composite(shell,SWT.NONE);
@@ -167,59 +161,7 @@ public class Application {
 			if (!display.readAndDispatch ()) display.sleep ();
 		}
 	}
-	public Menu createMenu(){
-		Menu bar = new Menu (shell, SWT.BAR|SWT.EMBEDDED);
-		MenuItem fileItem = new MenuItem (bar, SWT.CASCADE);
-		fileItem.setText ("&File");
-		Menu submenu = new Menu (shell, SWT.DROP_DOWN);
-		fileItem.setMenu (submenu);
-		
-		MenuItem newProject = new MenuItem (submenu, SWT.PUSH);
-		newProject.addListener (SWT.Selection, new Listener () {
-			public void handleEvent (Event e) {
-				DirectoryDialog dialog = new DirectoryDialog (shell);
-				String platform = SWT.getPlatform();
-				dialog.setFilterPath (platform.equals("win32") || platform.equals("wpf") ? "c:\\" : "/");
-				String fileName = dialog.open();
-				if(StringUtils.isNotBlank(fileName)){
-					File file = new File(fileName);
-					Project project = new Project(fileName,file.getName());
-					workspace.add(project);
-					TreeItem iItem = new TreeItem (workspaceTree, 0);
-					iItem.setText (file.getName());
-					iItem.setImage(getImage("projects.gif"));
-				}
-			}
-
-		});
-		newProject.setText ("&New Project\tCtrl+N");
-		newProject.setAccelerator (SWT.MOD1 + 'N');
-		
-		MenuItem open = new MenuItem (submenu, SWT.PUSH);
-		open.addListener (SWT.Selection, new Listener () {
-			public void handleEvent (Event e) {
-				FileDialog dialog = new FileDialog (shell);
-				String platform = SWT.getPlatform();
-				dialog.setFilterPath (platform.equals("win32") || platform.equals("wpf") ? "c:\\" : "/");
-				String fileName = dialog.open();
-				if(StringUtils.isNotBlank(fileName)){
-					addEditor(getImage("java.gif"), fileName);
-				}
-			}
-		});
-		open.setText ("&Open\tCtrl+O");
-		open.setAccelerator (SWT.MOD1 + 'O');
-		
-		MenuItem item = new MenuItem (submenu, SWT.PUSH);
-		item.addListener (SWT.Selection, new Listener () {
-			public void handleEvent (Event e) {
-				System.out.println ("Select All");
-			}
-		});
-		item.setText ("Select &All\tCtrl+A");
-		item.setAccelerator (SWT.MOD1 + 'A');
-		return bar;
-	}
+	
 	
 	public Composite createWorkspace(final Composite application, final Composite attachment){
 	    int style = SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL;
@@ -243,14 +185,13 @@ public class Application {
 		folder.setBorderVisible(true);
 		folder.setUnselectedImageVisible(true);
 		folder.setUnselectedCloseVisible(true);
-		for (int i = 0; i < count; i++) {
-			CTabItem item = new CTabItem(folder, SWT.CLOSE);
-			item.setText("Project Explore");
-			item.setImage(getImage("workset.gif"));
-			
-			workspaceTree = new Tree (folder, SWT.BORDER);
-			item.setControl(workspaceTree);
-		}
+		
+		CTabItem item = new CTabItem(folder, SWT.CLOSE);
+		item.setText("Project Explore");
+		item.setImage(getImage("workset.gif"));
+		workspaceTree = new Tree (folder, SWT.BORDER);
+		item.setControl(workspaceTree);
+		
 		folder.setMinimizeVisible(true);
 		folder.setTabHeight(30);
 		folder.setMaximizeVisible(true);
@@ -271,7 +212,6 @@ public class Application {
 		});
 		folder.setSelection(0);
 	}
-	
 
 	public static void createConsoleTab(final Image image, final Composite parent, int count){
 		final CTabFolder folder = new CTabFolder(parent, SWT.BORDER);
@@ -282,10 +222,9 @@ public class Application {
 		for (int i = 0; i < count; i++) {
 			CTabItem item = new CTabItem(folder, SWT.CLOSE);
 			item.setText("Console");
-			//
 			item.setImage(getImage("console_view.gif"));
 			Text text = new Text(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-			text.setText("Text for item "+i+"\n\none, two, three\n\nabcdefghijklmnop");
+			text.setText("");
 			item.setControl(text);
 		}
 		folder.setMinimizeVisible(true);
