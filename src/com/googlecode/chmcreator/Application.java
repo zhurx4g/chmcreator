@@ -1,8 +1,11 @@
 package com.googlecode.chmcreator;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.Semaphore;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -12,18 +15,24 @@ import org.eclipse.swt.custom.CTabFolder2Adapter;
 import org.eclipse.swt.custom.CTabFolderEvent;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.CoolBar;
+import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -41,17 +50,21 @@ public class Application {
 	
 	public static List<Project> projectList = new ArrayList<Project>();
 	
-	public static synchronized void setTitle(String title){
-		if(StringUtils.isBlank(title)){
-			shell.setText("Chmcreator");
-		}else{
-			shell.setText("Chmcreator - " + title);
-		}
-	}
+	public static Properties settings = new Properties();
+
 	public Application(){
+		//load settings
+		loadSettings();
+		
+		//create UI
+		createUI();
+	}
+
+	public void createUI(){
 		shell.setLayout (new FillLayout());
 		shell.setSize(display.getClientArea().width-60, display.getClientArea().height-60);
-		setTitle("");
+		setTitle(settings.getProperty("title"));
+		
 		//menu
 		Menu menuBar = createMenu();
 		shell.setMenuBar (menuBar);
@@ -89,11 +102,14 @@ public class Application {
 
 		framework.setWeights(new int[] {20,80});
 	}
-
 	/**
 	 * @param args
 	 */
 	public void start(String[] args) {
+		String workspacePath = settings.getProperty("workspace.path");
+		if(StringUtils.isBlank(workspacePath)){
+				switchWorkspace();
+		}
 		shell.open ();
 		while (!shell.isDisposed ()) {
 			if (!display.readAndDispatch ()) display.sleep ();
@@ -104,7 +120,47 @@ public class Application {
 		return ResourceLoader.getImage(string);
 	}
 
-	
+	public void switchWorkspace(){
+		final Shell dialog = new Shell (shell, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+		dialog.setText("Select a workspace");
+		dialog.setLayout (new FillLayout(SWT.VERTICAL));
+
+		Label label = new Label (dialog, SWT.NONE);
+		label.setText ("\n    Select a workspace\n");
+		label.setFont(new Font(display, label.getFont().getFontData()));
+		label.setBackground(new Color(display,255,255,255));
+
+		Label label2 = new Label (dialog, SWT.NONE);
+		label2.setText ("    Eclipse stores your projects in a folder called a workspace.\n" +
+				"    Choose a workspace folder to use for this session.");
+		label2.setBackground(new Color(display,255,255,255));
+		
+		Button cancel = new Button (dialog, SWT.PUSH);
+		cancel.setText ("Cancel");
+		cancel.addSelectionListener (new SelectionAdapter () {
+			public void widgetSelected (SelectionEvent e) {
+				dialog.close ();
+				System.exit(0);
+			}
+		});
+
+		final Text text = new Text (dialog, SWT.BORDER);
+
+		Button ok = new Button (dialog, SWT.PUSH);
+		ok.addSelectionListener (new SelectionAdapter () {
+			public void widgetSelected (SelectionEvent e) {
+				System.out.println ("User typed: " + text.getText ());
+				dialog.close ();
+			}
+		});
+
+		dialog.setDefaultButton (ok);
+		dialog.pack ();
+		dialog.open ();
+		while (!dialog.isDisposed ()) {
+			if (!display.readAndDispatch ()) display.sleep ();
+		}
+	}
 	public Menu createMenu(){
 		Menu bar = new Menu (shell, SWT.BAR);
 		MenuItem fileItem = new MenuItem (bar, SWT.CASCADE);
@@ -310,5 +366,21 @@ public class Application {
 			}
 		});
 		return folder;
+	}
+	
+	public static void loadSettings(){
+		try {
+			settings.load(FileUtils.openInputStream(new File("setting.properties")));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		settings.list(System.out);
+	}
+	public static synchronized void setTitle(String title){
+		if(StringUtils.isBlank(title)){
+			shell.setText("Chmcreator");
+		}else{
+			shell.setText("Chmcreator - " + title);
+		}
 	}
 }

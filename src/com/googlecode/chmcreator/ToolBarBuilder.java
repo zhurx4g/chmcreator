@@ -25,13 +25,12 @@ public class ToolBarBuilder {
 	    
 	    return coolBar;
 	}
-	static int itemCount;
 	CoolItem createItem(CoolBar coolBar, int count) {
 	    ToolBar toolBar = new ToolBar(coolBar, SWT.FLAT);
 	    for (int i = 0; i < count; i++) {
 	        ToolItem item = new ToolItem(toolBar, SWT.PUSH);
 	        item.setImage(ResourceLoader.getImage("java.gif"));
-	        item.setToolTipText(itemCount++ +"");
+	        item.setToolTipText("ToolBar TooTip!");
 	    }
 	    toolBar.pack();
 	    Point size = toolBar.getSize();
