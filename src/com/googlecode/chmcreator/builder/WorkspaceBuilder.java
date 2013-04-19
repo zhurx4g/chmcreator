@@ -38,7 +38,11 @@ public class WorkspaceBuilder {
 			NodeList list = rootElement.getElementsByTagName("project");
 			for(int i=0; i<list.getLength();i++){
 				Element element = (Element) list.item(i);
-				workspace.add(new Project(element.getAttribute("name"),element.getAttribute("path")));
+				
+				String projectPath = element.getAttribute("path");
+				Project project = new ProjectBuilder().build(element.getAttribute("name"),projectPath);
+
+				workspace.add(project);
 				System.out.println(element.getAttribute("name"));				
 			}
 

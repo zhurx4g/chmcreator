@@ -13,6 +13,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
+import com.googlecode.chmcreator.Application;
+import com.googlecode.chmcreator.ResourceLoader;
 import com.googlecode.chmcreator.bean.Project;
 
 public class MenubarBuilder {
@@ -62,12 +64,28 @@ public class MenubarBuilder {
 				dialog.setFilterPath (platform.equals("win32") || platform.equals("wpf") ? "c:\\" : "/");
 				String fileName = dialog.open();
 				if(StringUtils.isNotBlank(fileName)){
-					//addEditor(ResourceLoader.getImage("java.gif"), fileName);
+					Application.addEditor(ResourceLoader.getImage("java.gif"), fileName);
 				}
 			}
 		});
 		open.setText ("&Open\tCtrl+O");
 		open.setAccelerator (SWT.MOD1 + 'O');
+		
+		MenuItem importDir = new MenuItem (submenu, SWT.PUSH);
+		importDir.addListener (SWT.Selection, new Listener () {
+			public void handleEvent (Event e) {
+				DirectoryDialog dialog = new DirectoryDialog (shell);
+				String platform = SWT.getPlatform();
+				dialog.setFilterPath (platform.equals("win32") || platform.equals("wpf") ? "c:\\" : "/");
+				String fileName = dialog.open();
+				if(StringUtils.isNotBlank(fileName)){
+					Project project = new ProjectBuilder().build(fileName);
+					Application.addProject(project);
+				}
+			}
+		});
+		importDir.setText ("&Import\tCtrl+I");
+		importDir.setAccelerator (SWT.MOD1 + 'I');
 		
 		MenuItem item = new MenuItem (submenu, SWT.PUSH);
 		item.addListener (SWT.Selection, new Listener () {

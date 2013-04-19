@@ -1,0 +1,12 @@
+<project>
+	<entryList>
+		<entry name="file11" path="projectPath1" parent="true">
+		</entry>
+		<entry name="file12" path="projectPath2">
+		</entry>
+		<entry name="file13" path="projectPath3" parent="true">
+		</entry>
+		<entry name="file14" path="projectPath4">
+		</entry>
+	</entryList>
+</project>

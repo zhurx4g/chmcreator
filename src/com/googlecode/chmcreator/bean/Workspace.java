@@ -26,17 +26,36 @@ public class Workspace implements SelectionListener {
 	public void add(Project project){
 		projectList.add(project);
 		if(workspaceTree!=null){
-			TreeItem projectItem = newProjectItem(project.getName());
+			TreeItem projectItem = newProjectItem(project);
 			projectItem.setData(project);
 			
+			add(project, projectItem);
 			workspaceTree.setMenu(getMenu());
 		}
 	}
 	
-	public TreeItem newProjectItem(String name){
+	private void add(FileEntry parent, TreeItem parentItem){
+		List<FileEntry> entryList = parent.getEntryList();
+		for(FileEntry entry : entryList){
+			TreeItem entryItem = new TreeItem (parentItem, 0);
+			entryItem.setText(entry.getName());
+			entryItem.setImage(entry.isParent()?ResourceLoader.getImage("fldr_obj.gif"):ResourceLoader.getImage("jcu_obj.gif"));
+			entryItem.setData(entry);
+			if(entry.getEntryList().size()>0){
+				add(entry, entryItem);
+			}
+		}
+	}
+	
+	public TreeItem newProjectItem(Project project){
 		TreeItem iItem = new TreeItem (workspaceTree, 0);
-		iItem.setText (name);
-		iItem.setImage(ResourceLoader.getImage("projects.gif"));
+		iItem.setText (project.getName());
+		
+		if(project.isOpen()){
+			iItem.setImage(ResourceLoader.getImage("projects.gif"));
+		}else{
+			iItem.setImage(ResourceLoader.getImage("cprj_obj.gif"));
+		}
 		
 		return iItem;
 	}

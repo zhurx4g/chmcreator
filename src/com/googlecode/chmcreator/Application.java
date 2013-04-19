@@ -33,10 +33,12 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipsian.swt.composer.HyperComposer;
 
+import com.googlecode.chmcreator.bean.Project;
 import com.googlecode.chmcreator.bean.Workspace;
 import com.googlecode.chmcreator.builder.MenubarBuilder;
 import com.googlecode.chmcreator.builder.ToolBarBuilder;
 import com.googlecode.chmcreator.builder.WorkspaceBuilder;
+import com.googlecode.chmcreator.editor.HTMLEditor;
 
 public class Application {
 
@@ -115,6 +117,9 @@ public class Application {
 			if (!display.readAndDispatch ()) display.sleep ();
 		}
 		display.dispose ();
+	}
+	public static void addProject(Project project){
+		workspace.add(project);
 	}
 	public static Image getImage(String string) {
 		return ResourceLoader.getImage(string);
@@ -247,20 +252,23 @@ public class Application {
 		});
 		folder.setSelection(0);
 	}
-	public void addEditor(final Image image, String fileName){
+	public static void addEditor(final Image image, String fileName){
 		CTabItem item = new CTabItem(tabEditor, SWT.CLOSE);
 		item.setImage(image);
 		File file = new File(fileName);
 		item.setText(file.getName());
 		item.setToolTipText(fileName);
-		HyperComposer composer = new HyperComposer(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-		item.setControl(composer);
-		composer.setCursor(Cursor.TEXT_CURSOR);
+//		HyperComposer composer = new HyperComposer(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+//		item.setControl(composer);
+//		composer.setCursor(Cursor.TEXT_CURSOR);
+		HTMLEditor htmlEditor = new HTMLEditor(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		try {
-			composer.setContent(FileUtils.readFileToString(file, "utf-8"));
+			htmlEditor.setContent(FileUtils.readFileToString(file, "utf-8"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		item.setControl(htmlEditor);
+		System.out.println("ffffffffffffffffffffffffffffffffff");
 		setTitle(file.getName());
 		
 		tabEditor.setSelection(item);

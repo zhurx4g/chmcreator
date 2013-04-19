@@ -1,10 +1,10 @@
 <projects>
-	<project name="Project1中文" path="projectPath1">
+	<project name="Project1" path="/home/zhuruixian/workspace/chmcreator/workspace/projectPath1">
 	</project>
-	<project name="Project2" path="projectPath2">
+	<project name="Project2" path="/home/zhuruixian/workspace/chmcreator/workspace/projectPath2">
 	</project>
-	<project name="Project3" path="projectPath3">
+	<project name="Project3" path="/home/zhuruixian/workspace/chmcreator/workspace/projectPath3">
 	</project>
-	<project name="Project4" path="projectPath4">
+	<project name="Project4" path="/home/zhuruixian/workspace/chmcreator/workspace/projectPath4">
 	</project>
 </projects>

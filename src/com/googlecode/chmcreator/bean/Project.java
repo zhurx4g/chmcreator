@@ -1,27 +1,19 @@
 package com.googlecode.chmcreator.bean;
 
-public class Project {
 
-	private String name;
-	private String path;
+public class Project extends FileEntry {
 
+	private boolean open;
 	public Project(String name, String path){
-		this.name = name;
-		this.path = path;
+		super(name, path, true);
 	}
 	
-	public String getPath() {
-		return path;
-	}
-	public void setPath(String path) {
-		this.path = path;
-	}
-	public String getName() {
-		return name;
+	public boolean isOpen() {
+		return open;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setOpen(boolean open) {
+		this.open = open;
 	}
 	
 }
