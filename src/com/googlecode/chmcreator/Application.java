@@ -175,7 +175,7 @@ public class Application {
 	
 	
 	public Composite createWorkspace(final Composite application, final Composite attachment){
-	    int style = SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL;
+	    int style = SWT.NONE;
 	    //Text text = new Text(application, style);
 	    Composite workspace = new Composite(application,style);
 	    workspace.setBackground(new Color(display,0,0,0));
