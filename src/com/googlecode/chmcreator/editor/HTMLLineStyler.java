@@ -5,10 +5,14 @@ import java.io.StringReader;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.Bullet;
 import org.eclipse.swt.custom.LineStyleEvent;
 import org.eclipse.swt.custom.LineStyleListener;
+import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GlyphMetrics;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -23,26 +27,19 @@ public class HTMLLineStyler implements LineStyleListener {
 	Vector<int[]> blockComments = new Vector<int[]>();
 
 	public static final int EOF = -1;
-
 	public static final int EOL = 10;
-
 	public static final int WORD = 0;
-
 	public static final int WHITE = 1;
-
 	public static final int KEY = 2;
-
 	public static final int COMMENT = 3;
-
 	public static final int STRING = 5;
-
 	public static final int OTHER = 6;
-
 	public static final int NUMBER = 7;
-
 	public static final int MAXIMUM_TOKEN = 8;
 
-	public HTMLLineStyler() {
+	private StyledText styledText;
+	public HTMLLineStyler(StyledText styledText) {
+		this.styledText = styledText;
 		initializeColors();
 		scanner = new HTMLScanner();
 	}
@@ -98,6 +95,15 @@ public class HTMLLineStyler implements LineStyleListener {
 	 * (output) LineStyleEvent.background line background color (output)
 	 */
 	public void lineGetStyle(LineStyleEvent event) {
+		int lineNumber = styledText.getLineAtOffset(event.lineOffset);
+		// Set the line number
+		event.bulletIndex = lineNumber;
+		// Set the style, 12 pixles wide for each digit
+		StyleRange styleA = new StyleRange();
+		styleA.metrics = new GlyphMetrics(0, 0, Integer.toString(styledText.getLineCount()+1).length()*12);
+		// Create and set the bullet
+		event.bullet = new Bullet(ST.BULLET_NUMBER, styleA);
+
 		Vector<StyleRange> styles = new Vector<StyleRange>();
 		int token;
 		StyleRange lastStyle;
@@ -105,8 +111,8 @@ public class HTMLLineStyler implements LineStyleListener {
 		// entire line.
 		if (inBlockComment(event.lineOffset,
 				event.lineOffset + event.lineText.length())) {
-			styles.add(new StyleRange(event.lineOffset, event.lineText
-					.length(), getColor(COMMENT), null));
+			styles.add(new StyleRange(event.lineOffset,
+					event.lineText.length(), getColor(COMMENT), null));
 			event.styles = new StyleRange[styles.size()];
 			styles.copyInto(event.styles);
 			return;

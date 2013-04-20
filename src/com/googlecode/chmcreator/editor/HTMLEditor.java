@@ -13,6 +13,10 @@ import org.eclipse.swt.custom.LineStyleListener;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.GlyphMetrics;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
@@ -33,7 +37,7 @@ public class HTMLEditor extends Composite {
 	private StyledText styledText;
 	private HyperComposer composer;
 	private String path = "";
-	private HTMLLineStyler lineStyler = new HTMLLineStyler();
+	private HTMLLineStyler lineStyler = null;
 	final static List<String> KEYWORDS = new ArrayList<String>();
 	static {
 		KEYWORDS.add("<html>");
@@ -47,21 +51,17 @@ public class HTMLEditor extends Composite {
 		CTabItem html = new CTabItem(folder, SWT.NORMAL);
 		html.setText("HTML");
 		styledText = new StyledText(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		lineStyler = new HTMLLineStyler(styledText);
 		styledText.addLineStyleListener(lineStyler);
-//		styledText.addLineStyleListener(new LineStyleListener()
-//		{
-//		    public void lineGetStyle(LineStyleEvent e)
-//		    {
-//		    	int lineNumber = styledText.getLineAtOffset(e.lineOffset);
-//		        //Set the line number
-//		        e.bulletIndex = lineNumber;
-//		        //Set the style, 12 pixles wide for each digit
-//		        StyleRange style = new StyleRange();
-//		        style.metrics = new GlyphMetrics(0, 0, Integer.toString(styledText.getLineCount()+1).length()*12);
-//		        //Create and set the bullet
-//		        e.bullet = new Bullet(ST.BULLET_NUMBER,style);
-//		    }
-//		});
+
+		styledText.addModifyListener(new ModifyListener(){
+
+			@Override
+			public void modifyText(ModifyEvent arg0) {
+				styledText.redraw();
+			}
+			
+		});
 		html.setControl(styledText);
 		
 		CTabItem design = new CTabItem(folder, SWT.NORMAL);
@@ -107,15 +107,7 @@ public class HTMLEditor extends Composite {
 		textData.right = new FormAttachment(100);
 		textData.top = new FormAttachment(coolBar);
 		textData.bottom = new FormAttachment(100);
-//		composer.setURIResolver(new IURIResolver(){
-//			@Override
-//			public URI resolve(URI arg0) {
-//				URI uri = URI.create(HTMLEditor.this.getPath()+"/"+arg0.getPath());
-//				System.out.println("===============" + uri);
-//				return uri;
-//			}
-//			
-//		});
+
 		composer.setLayoutData(textData);
 		composer.setLayout(new FillLayout());
 		
