@@ -56,6 +56,8 @@ public class Application {
 	
 	public static Properties settings = new Properties();
 
+	public static int TAB_HEIGHT = SWT.getPlatform().equals("win32")?22:30;
+	
 	private WorkspaceBuilder workspaceBuilder = null;
 	
 	private ConsoleTextHelper consoleHelper = null;
@@ -175,9 +177,8 @@ public class Application {
 	
 	
 	public Composite createWorkspace(final Composite application, final Composite attachment){
-	    int style = SWT.NONE;
 	    //Text text = new Text(application, style);
-	    Composite workspace = new Composite(application,style);
+	    Composite workspace = new Composite(application,SWT.NONE);
 	    workspace.setBackground(new Color(display,0,0,0));
 	    FormData textData = new FormData();
 	    textData.left = new FormAttachment(0);
@@ -204,7 +205,7 @@ public class Application {
 		item.setControl(workspaceTree);
 		
 		folder.setMinimizeVisible(true);
-		folder.setTabHeight(30);
+		folder.setTabHeight(TAB_HEIGHT);
 		folder.setMaximizeVisible(true);
 		folder.addCTabFolder2Listener(new CTabFolder2Adapter() {
 			public void minimize(CTabFolderEvent event) {
@@ -241,7 +242,7 @@ public class Application {
 
 		folder.setMinimizeVisible(true);
 		folder.setMaximizeVisible(true);
-		folder.setTabHeight(30);
+		folder.setTabHeight(TAB_HEIGHT);
 		folder.addCTabFolder2Listener(new CTabFolder2Adapter() {
 			public void minimize(CTabFolderEvent event) {
 				folder.setMinimized(true);
@@ -296,7 +297,7 @@ public class Application {
 		folder.setBorderVisible(true);
 		folder.setUnselectedImageVisible(true);
 		folder.setUnselectedCloseVisible(true);
-		folder.setTabHeight(30);
+		folder.setTabHeight(TAB_HEIGHT);
 		folder.setMinimizeVisible(true);
 		folder.setMaximizeVisible(true);
 		folder.addCTabFolder2Listener(new CTabFolder2Adapter() {
