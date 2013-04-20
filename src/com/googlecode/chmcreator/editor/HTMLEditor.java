@@ -10,6 +10,8 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
@@ -39,7 +41,7 @@ public class HTMLEditor extends Composite {
 		WYSWYG_MODIFY,
 	}
 	
-	private State state = State.NORMAL;
+	private volatile State state = State.NORMAL;
 	
 	final static List<String> KEYWORDS = new ArrayList<String>();
 	static {
@@ -47,14 +49,13 @@ public class HTMLEditor extends Composite {
 		KEYWORDS.add("</html>");
 	}
 	
-	private List<Listener> stateChangeLiseners = new ArrayList<Listener>();
 	@SuppressWarnings("unused")
 	public HTMLEditor(Composite parent, int arg1) {
 		super(parent, arg1);
 		this.setLayout(new FillLayout());
 		folder = new CTabFolder(this, SWT.NORMAL|SWT.BOTTOM);
 		
-		CTabItem html = new CTabItem(folder, SWT.NORMAL);
+		final CTabItem html = new CTabItem(folder, SWT.NORMAL);
 		html.setText("HTML");
 		styledText = new StyledText(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		lineStyler = new HTMLLineStyler(styledText);
@@ -70,7 +71,7 @@ public class HTMLEditor extends Composite {
 		});
 		html.setControl(styledText);
 		
-		CTabItem design = new CTabItem(folder, SWT.NORMAL);
+		final CTabItem design = new CTabItem(folder, SWT.NORMAL);
 		design.setText("Design");
 		Composite parentComposite = new Composite(folder, SWT.NORMAL);
 		parentComposite.setLayout(new FormLayout());
@@ -133,6 +134,29 @@ public class HTMLEditor extends Composite {
 			
 		});
 		folder.setSelection(html);
+		folder.addSelectionListener(new SelectionListener(){
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				CTabItem item = (CTabItem)event.item;
+				if(html.equals(item)&&state.equals(State.WYSWYG_MODIFY)){
+					System.out.println("get from composer");
+					styledText.setText(composer.getContent());
+					state = State.WYSWYG_MODIFY;
+				}else if(design.equals(item)&&state.equals(State.TEXT_MODIFY)){
+					System.out.println("get from text");
+					composer.setContent(styledText.getText());
+					state = State.TEXT_MODIFY;
+				}
+				System.out.println(item.getText());
+			}
+			
+		});
 	}
 
 	private void updateState(State state){
@@ -147,10 +171,6 @@ public class HTMLEditor extends Composite {
 		for(Listener listener:listeners){
 			listener.handleEvent(null);
 		}
-	}
-	
-	public void addListener(Listener listener){
-		stateChangeLiseners.add(listener);
 	}
 	
 	public void setContent(String content){
