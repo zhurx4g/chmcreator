@@ -107,7 +107,6 @@ public class ProjectBuilder {
 				String projectPath = element.getAttribute("path");
 				project.addFileEntry(new FileEntry(element.getAttribute("name"),
 						projectPath,Boolean.parseBoolean(element.getAttribute("parent"))));
-				System.out.println("entry================" + element.getAttribute("name"));				
 			}
 
 		} catch (Exception e) {

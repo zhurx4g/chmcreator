@@ -2,10 +2,13 @@ package com.googlecode.chmcreator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabFolder2Adapter;
@@ -40,7 +43,8 @@ import com.googlecode.chmcreator.builder.WorkspaceBuilder;
 import com.googlecode.chmcreator.editor.HTMLEditor;
 
 public class Application {
-
+	protected Log logger = LogFactory.getLog(getClass());
+	
 	public final Display display = Display.getDefault();
 	public final Shell shell = new Shell(display);
 
@@ -309,13 +313,17 @@ public class Application {
 		return folder;
 	}
 	
-	public static void loadSettings(){
+	public void loadSettings(){
 		try {
 			settings.load(FileUtils.openInputStream(new File("setting.properties")));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		settings.list(System.out);
+		logger.info("============Settings===========");
+		for(Entry<Object, Object> entry:settings.entrySet()){
+			logger.info("["+entry.getKey() +"]=["+entry.getValue()+"]");
+		}
+		logger.info("============Settings===========");
 	}
 	public synchronized void setTitle(String title){
 		if(StringUtils.isBlank(title)){
