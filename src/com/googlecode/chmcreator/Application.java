@@ -65,14 +65,14 @@ public class Application {
 		Menu menuBar = new MenubarBuilder(display, shell).build(this);
 		shell.setMenuBar (menuBar);
 		
-		Composite application = new Composite(shell,SWT.NONE);
-		application.setLayout(new FormLayout());
+		Composite app = new Composite(shell,SWT.NONE);
+		app.setLayout(new FormLayout());
 
 		//toolbar
-		CoolBar coolBar = new ToolBarBuilder(application).build();
+		CoolBar coolBar = new ToolBarBuilder(app).build();
 
 		//workspace
-		Composite workspace = createWorkspace(application,coolBar);
+		Composite workspace = createWorkspace(app,coolBar);
 		
 		//framework
 		SashForm framework = new SashForm(workspace,SWT.HORIZONTAL);
@@ -260,6 +260,7 @@ public class Application {
 		item.setText(file.getName());
 		item.setToolTipText(fileName);
 		HTMLEditor htmlEditor = new HTMLEditor(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		htmlEditor.setPath(file.getParentFile().getAbsolutePath());
 		try {
 			htmlEditor.setContent(FileUtils.readFileToString(file, "utf-8"));
 		} catch (Exception e) {

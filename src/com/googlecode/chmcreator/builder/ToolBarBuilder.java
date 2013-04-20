@@ -12,14 +12,14 @@ import com.googlecode.chmcreator.ResourceLoader;
 
 public class ToolBarBuilder {
 
-	private Composite application;
+	private Composite app;
 	
-	public ToolBarBuilder(Composite application){
-		this.application = application;
+	public ToolBarBuilder(Composite app){
+		this.app = app;
 	}
 	
 	public CoolBar build(){
-	    CoolBar coolBar = new CoolBar(application, SWT.NONE);
+	    CoolBar coolBar = new CoolBar(app, SWT.NONE);
 	    createFileBar(coolBar);
 	    createBuildBar(coolBar);
 	    //createItem(coolBar, 3);
