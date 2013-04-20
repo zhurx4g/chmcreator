@@ -25,7 +25,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -254,7 +256,7 @@ public class Application {
 		if(!file.exists()||file.isDirectory())
 			return;
 		
-		CTabItem item = new CTabItem(tabEditor, SWT.CLOSE);
+		final CTabItem item = new CTabItem(tabEditor, SWT.CLOSE);
 		item.setImage(image);
 		item.setText(file.getName());
 		item.setToolTipText(fileName);
@@ -265,6 +267,16 @@ public class Application {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		htmlEditor.addListener(SWT.Modify, new Listener(){
+
+			@Override
+			public void handleEvent(Event arg0) {
+				if(item.getText().charAt(0)=='*')
+					return;
+				item.setText("*"+item.getText());
+			}
+			
+		});
 		item.setControl(htmlEditor);
 		setTitle(file.getName());
 		

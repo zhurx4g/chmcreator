@@ -18,9 +18,11 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.CoolItem;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipsian.swt.composer.HyperComposer;
+import org.eclipsian.swt.composer.IDocumentStateListener;
 
 import com.googlecode.chmcreator.ResourceLoader;
 
@@ -30,11 +32,22 @@ public class HTMLEditor extends Composite {
 	private HyperComposer composer;
 	private String path = "";
 	private HTMLLineStyler lineStyler = null;
+	
+	enum State {
+		NORMAL,
+		TEXT_MODIFY,
+		WYSWYG_MODIFY,
+	}
+	
+	private State state = State.NORMAL;
+	
 	final static List<String> KEYWORDS = new ArrayList<String>();
 	static {
 		KEYWORDS.add("<html>");
 		KEYWORDS.add("</html>");
 	}
+	
+	private List<Listener> stateChangeLiseners = new ArrayList<Listener>();
 	@SuppressWarnings("unused")
 	public HTMLEditor(Composite parent, int arg1) {
 		super(parent, arg1);
@@ -48,10 +61,10 @@ public class HTMLEditor extends Composite {
 		styledText.addLineStyleListener(lineStyler);
 
 		styledText.addModifyListener(new ModifyListener(){
-
 			@Override
 			public void modifyText(ModifyEvent arg0) {
 				styledText.redraw();
+				updateState(State.TEXT_MODIFY, false);
 			}
 			
 		});
@@ -106,14 +119,44 @@ public class HTMLEditor extends Composite {
 		
 		design.setControl(parentComposite);
 		composer.setCursor(Cursor.TEXT_CURSOR);
-		
+		composer.addDocumentStateListener(new IDocumentStateListener(){
+
+			@Override
+			public void documentCreated() {
+				
+			}
+
+			@Override
+			public void documentModified() {
+				updateState(State.WYSWYG_MODIFY, false);
+			}
+			
+		});
 		folder.setSelection(html);
 	}
 
+	private void updateState(State state){
+		updateState(state, true);
+	}
+	private void updateState(State state, boolean isInner){
+		this.state = state;
+		if(isInner)
+			return;
+		
+		Listener[] listeners = getListeners(SWT.Modify);
+		for(Listener listener:listeners){
+			listener.handleEvent(null);
+		}
+	}
+	
+	public void addListener(Listener listener){
+		stateChangeLiseners.add(listener);
+	}
+	
 	public void setContent(String content){
-		//lineStyler.parseBlockComments(content);
 		styledText.setText(content);
 		composer.setContent(content);
+		updateState(State.NORMAL);
 	}
 	ToolItem newToolItem(ToolBar toolBar, String imageName, String toolTip){
 		ToolItem toolItem = new ToolItem(toolBar, SWT.PUSH);
