@@ -23,7 +23,7 @@ public class HTMLScanner {
 	public static final int NUMBER = 7;
 
 	public static final int MAXIMUM_TOKEN = 8;
-	protected Hashtable fgKeys = null;
+	protected Hashtable<String,Integer> fgKeys = null;
 
 	protected StringBuffer fBuffer = new StringBuffer();
 
@@ -61,7 +61,7 @@ public class HTMLScanner {
 	 * Initialize the lookup table.
 	 */
 	void initialize() {
-		fgKeys = new Hashtable();
+		fgKeys = new Hashtable<String,Integer>();
 		Integer k = new Integer(KEY);
 		for (int i = 0; i < fgKeywords.length; i++)
 			fgKeys.put(fgKeywords[i], k);
@@ -99,7 +99,7 @@ public class HTMLScanner {
 				}
 				return OTHER;
 			case '\'': // char const
-				character: for (;;) {
+				for (;;) {
 					c = read();
 					switch (c) {
 					case '\'':
@@ -114,7 +114,7 @@ public class HTMLScanner {
 				}
 
 			case '"': // string
-				string: for (;;) {
+				for (;;) {
 					c = read();
 					switch (c) {
 					case '"':
