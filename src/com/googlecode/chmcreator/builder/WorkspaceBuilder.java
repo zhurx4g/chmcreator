@@ -1,9 +1,15 @@
 package com.googlecode.chmcreator.builder;
 
 import java.io.File;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.swt.widgets.Tree;
 import org.w3c.dom.Document;
@@ -11,6 +17,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import com.googlecode.chmcreator.Application;
+import com.googlecode.chmcreator.CHM;
 import com.googlecode.chmcreator.bean.Project;
 import com.googlecode.chmcreator.bean.Workspace;
 
@@ -24,6 +31,7 @@ public class WorkspaceBuilder {
 	
 	public Workspace build(Application application, Tree workspaceTree){
 		Workspace workspace = new Workspace(application, workspaceTree);
+		workspace.setPath(path);
 		parse(workspace);
 		return workspace;
 	}
@@ -51,7 +59,7 @@ public class WorkspaceBuilder {
 			System.out.println("exception:" + e.getMessage());
 		}
 	}
-
+	
 	private String getProjectsFile(){
 		return path + File.separator + "projects.xml";
 	}

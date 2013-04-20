@@ -80,15 +80,15 @@ public class HTMLEditor extends Composite {
 		textData.right = new FormAttachment(100);
 		textData.top = new FormAttachment(coolBar);
 		textData.bottom = new FormAttachment(100);
-		composer.setURIResolver(new IURIResolver(){
-			@Override
-			public URI resolve(URI arg0) {
-				URI uri = URI.create(HTMLEditor.this.getPath()+"/"+arg0.getPath());
-				System.out.println("===============" + uri);
-				return uri;
-			}
-			
-		});
+//		composer.setURIResolver(new IURIResolver(){
+//			@Override
+//			public URI resolve(URI arg0) {
+//				URI uri = URI.create(HTMLEditor.this.getPath()+"/"+arg0.getPath());
+//				System.out.println("===============" + uri);
+//				return uri;
+//			}
+//			
+//		});
 		composer.setLayoutData(textData);
 		composer.setLayout(new FillLayout());
 		

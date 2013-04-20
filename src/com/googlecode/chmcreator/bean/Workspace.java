@@ -1,7 +1,16 @@
 package com.googlecode.chmcreator.bean;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -13,8 +22,11 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.googlecode.chmcreator.Application;
+import com.googlecode.chmcreator.CHM;
 import com.googlecode.chmcreator.ResourceLoader;
 
 public class Workspace implements SelectionListener {
@@ -22,6 +34,7 @@ public class Workspace implements SelectionListener {
 	private List<Project> projectList = new ArrayList<Project>();
 	private Tree workspaceTree;
 	private Application application;
+	private String path;
 	public Workspace(Application application, Tree tree){
 		this.application = application;
 		workspaceTree = tree;
@@ -44,12 +57,48 @@ public class Workspace implements SelectionListener {
 	
 	public void add(Project project){
 		projectList.add(project);
+		save();
 		if(workspaceTree!=null){
 			TreeItem projectItem = newProjectItem(project);
 			projectItem.setData(project);
 			
 			add(project, projectItem);
 			workspaceTree.setMenu(getMenu());
+		}
+	}
+	
+	public void save(){
+		saveTo(path);
+	}
+	public void saveTo(String path){
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document document = builder.newDocument();
+			Element rootElement = document.createElement("projects");
+			document.appendChild(rootElement);
+			
+			List<Project> projectList = getProjectList();
+			for(Project project:projectList){
+				Element projectElement = document.createElement("project");
+				projectElement.setAttribute("name", project.getName());
+				projectElement.setAttribute("path", project.getPath());
+				rootElement.appendChild(projectElement);
+			}
+			
+			TransformerFactory tff = TransformerFactory.newInstance();
+			tff.setAttribute("indent-number", 4);
+		    Transformer tf = tff.newTransformer();
+		    DOMSource source = new DOMSource(document);
+		    StreamResult result = new StreamResult(new File(path, CHM.PROJECTS_NAME));
+		   
+		    //设置输出编码
+		    tf.setOutputProperty(OutputKeys.INDENT,"yes");
+		    tf.setOutputProperty("encoding", "utf-8");
+		    tf.transform(source, result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
 		}
 	}
 	
@@ -107,4 +156,20 @@ public class Workspace implements SelectionListener {
 
 	@Override
 	public void widgetDefaultSelected(SelectionEvent arg0) {}
+
+	public List<Project> getProjectList() {
+		return projectList;
+	}
+
+	public void setProjectList(List<Project> projectList) {
+		this.projectList = projectList;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
 }

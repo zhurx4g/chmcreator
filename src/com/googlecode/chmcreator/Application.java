@@ -31,7 +31,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 
-import com.googlecode.chmcreator.bean.Project;
 import com.googlecode.chmcreator.bean.Workspace;
 import com.googlecode.chmcreator.builder.MenubarBuilder;
 import com.googlecode.chmcreator.builder.ToolBarBuilder;
@@ -50,6 +49,7 @@ public class Application {
 	
 	public static Properties settings = new Properties();
 
+	private WorkspaceBuilder workspaceBuilder = null;
 	public Application(){
 		loadSettings();//load settings
 		
@@ -108,7 +108,8 @@ public class Application {
 		}
 		
 		workspacePath = settings.getProperty("workspace.path");
-		workspace = new WorkspaceBuilder(workspacePath).build(this, workspaceTree);
+		workspaceBuilder = new WorkspaceBuilder(workspacePath);
+		workspace = workspaceBuilder.build(this, workspaceTree);
 		
 		shell.open ();
 		while (!shell.isDisposed ()) {
@@ -116,9 +117,7 @@ public class Application {
 		}
 		display.dispose ();
 	}
-	public void addProject(Project project){
-		workspace.add(project);
-	}
+
 	public static Image getImage(String string) {
 		return ResourceLoader.getImage(string);
 	}
