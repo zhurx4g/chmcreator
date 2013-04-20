@@ -5,6 +5,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.CoolItem;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
@@ -48,7 +50,11 @@ public class ToolBarBuilder {
 	    
         ToolItem buildItem = newToolItem(toolBar, "builder.gif","Build All(Ctrl+B)");
         ToolItem runItem = newToolItem(toolBar, "lrun_obj.gif","Run");
-        //ToolItem printItem = newToolItem(toolBar, "print_edit.gif","Print(Ctrl+P)");
+        runItem.addListener(SWT.Selection, new Listener(){
+			public void handleEvent(Event arg0) {
+				System.out.println("xxx");
+			}
+        });
         
 	    toolBar.pack();
 	    Point size = toolBar.getSize();

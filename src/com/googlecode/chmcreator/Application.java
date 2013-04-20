@@ -41,6 +41,7 @@ import com.googlecode.chmcreator.builder.MenubarBuilder;
 import com.googlecode.chmcreator.builder.ToolBarBuilder;
 import com.googlecode.chmcreator.builder.WorkspaceBuilder;
 import com.googlecode.chmcreator.editor.HTMLEditor;
+import com.googlecode.chmcreator.helper.ConsoleTextHelper;
 
 public class Application {
 	protected Log logger = LogFactory.getLog(getClass());
@@ -56,6 +57,8 @@ public class Application {
 	public static Properties settings = new Properties();
 
 	private WorkspaceBuilder workspaceBuilder = null;
+	
+	private ConsoleTextHelper consoleHelper = null;
 	public Application(){
 		loadSettings();//load settings
 		
@@ -99,7 +102,7 @@ public class Application {
 		//console
 		Composite consoleParent = new Composite(editorArea,SWT.NONE);
 		consoleParent.setLayout(new FillLayout());
-		createConsoleTab(getImage("java.gif"),consoleParent, 1);
+		createConsoleTab(getImage("java.gif"),consoleParent);
 		editorArea.setWeights(new int[] {70, 30});
 
 		framework.setWeights(new int[] {20,80});
@@ -221,20 +224,21 @@ public class Application {
 		folder.setSelection(0);
 	}
 
-	public static void createConsoleTab(final Image image, final Composite parent, int count){
+	public void createConsoleTab(final Image image, final Composite parent){
 		final CTabFolder folder = new CTabFolder(parent, SWT.BORDER);
 		folder.setSimple(false);
 		folder.setBorderVisible(true);
 		folder.setUnselectedImageVisible(true);
 		folder.setUnselectedCloseVisible(true);
-		for (int i = 0; i < count; i++) {
-			CTabItem item = new CTabItem(folder, SWT.CLOSE);
-			item.setText("Console");
-			item.setImage(getImage("console_view.gif"));
-			Text text = new Text(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-			text.setText("");
-			item.setControl(text);
-		}
+		
+		CTabItem item = new CTabItem(folder, SWT.CLOSE);
+		item.setText("Console");
+		item.setImage(getImage("console_view.gif"));
+		Text consoleText = new Text(folder, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		consoleText.setText("");
+		item.setControl(consoleText);
+		consoleHelper = new ConsoleTextHelper(consoleText);
+
 		folder.setMinimizeVisible(true);
 		folder.setMaximizeVisible(true);
 		folder.setTabHeight(30);
