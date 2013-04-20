@@ -125,7 +125,7 @@ public class HTMLEditor extends Composite {
 
 		composer.setLayoutData(textData);
 		composer.setLayout(new FillLayout());
-		//composer.setFlavour(HyperComposer.FLAVOUR_CSS);
+		composer.setFlavour(HyperComposer.FLAVOUR_CSS);
 		design.setControl(parentComposite);
 		composer.setCursor(Cursor.TEXT_CURSOR);
 		composer.addDocumentStateListener(new IDocumentStateListener(){

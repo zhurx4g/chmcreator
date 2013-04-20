@@ -12,6 +12,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.googlecode.chmcreator.CHM;
@@ -101,17 +102,37 @@ public class ProjectBuilder {
 			Document document = builder.parse(projectFile);
 			Element rootElement = document.getDocumentElement();
 
-			NodeList list = rootElement.getElementsByTagName("entry");
+			Element entryList = (Element)rootElement.getElementsByTagName("entryList").item(0);
+			parseElement(entryList, project);
+			/*
 			for(int i=0; i<list.getLength();i++){
 				Element element = (Element) list.item(i);
 				String projectPath = element.getAttribute("path");
 				project.addFileEntry(new FileEntry(element.getAttribute("name"),
 						projectPath,Boolean.parseBoolean(element.getAttribute("parent"))));
-			}
+			}*/
 
 		} catch (Exception e) {
 			System.out.println("exception:" + path + e.getMessage());
 			project.setOpen(false);
+		}
+	}
+	
+	private void parseElement(Element parent, FileEntry parentEntry){
+		NodeList list = parent.getChildNodes();
+		for(int i=0; i<list.getLength();i++){
+			Node node = list.item(i);
+			System.out.println(node.getNodeName());
+			if(!(node instanceof Element &&((Element) node).getNodeName().equals("entry"))){
+				continue;
+			}
+			Element element = (Element) node;
+			String projectPath = element.getAttribute("path");
+			FileEntry fileEntry = new FileEntry(element.getAttribute("name"),projectPath,Boolean.parseBoolean(element.getAttribute("parent")));
+			parentEntry.addFileEntry(fileEntry);
+			if(element.getChildNodes().getLength()>0){
+				parseElement(element, fileEntry);
+			}
 		}
 	}
 	private String getProjectFile(String path){

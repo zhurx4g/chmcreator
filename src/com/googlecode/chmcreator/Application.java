@@ -269,7 +269,7 @@ public class Application {
 		item.setImage(image);
 		item.setText(file.getName());
 		item.setToolTipText(fileName);
-		HTMLEditor htmlEditor = new HTMLEditor(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		HTMLEditor htmlEditor = new HTMLEditor(tabEditor, SWT.NONE);
 		htmlEditor.setPath(file.getParentFile().getAbsolutePath());
 		try {
 			htmlEditor.setContent(FileUtils.readFileToString(file, "utf-8"));
@@ -292,7 +292,7 @@ public class Application {
 		tabEditor.setSelection(item);
 	}
 	public static CTabFolder createTabEditor(final Composite parent){
-		final CTabFolder folder = new CTabFolder(parent, SWT.BORDER);
+		final CTabFolder folder = new CTabFolder(parent, SWT.NONE);
 		folder.setSimple(false);
 		folder.setBorderVisible(true);
 		folder.setUnselectedImageVisible(true);
