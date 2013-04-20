@@ -10,6 +10,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.googlecode.chmcreator.Application;
 import com.googlecode.chmcreator.bean.Project;
 import com.googlecode.chmcreator.bean.Workspace;
 
@@ -21,8 +22,8 @@ public class WorkspaceBuilder {
 		this.path = path;
 	}
 	
-	public Workspace build(Tree workspaceTree){
-		Workspace workspace = new Workspace(workspaceTree);
+	public Workspace build(Application application, Tree workspaceTree){
+		Workspace workspace = new Workspace(application, workspaceTree);
 		parse(workspace);
 		return workspace;
 	}

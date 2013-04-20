@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
@@ -13,14 +14,32 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
+import com.googlecode.chmcreator.Application;
 import com.googlecode.chmcreator.ResourceLoader;
 
 public class Workspace implements SelectionListener {
 
 	private List<Project> projectList = new ArrayList<Project>();
 	private Tree workspaceTree;
-	public Workspace(Tree tree){
+	private Application application;
+	public Workspace(Application application, Tree tree){
+		this.application = application;
 		workspaceTree = tree;
+		workspaceTree.addListener(SWT.MouseDoubleClick, new Listener(){
+
+			@Override
+			public void handleEvent(Event event) {
+				Point point = new Point (event.x, event.y);
+			    TreeItem item = workspaceTree.getItem (point);
+			    if(item!=null){
+			    	FileEntry fileEntry = (FileEntry) item.getData();
+			    	if(fileEntry!=null){
+			    		Workspace.this.application.addEditor(ResourceLoader.getImage("java.gif"), fileEntry.getPath());
+			    	}
+			    }
+			}
+			
+		});
 	}
 	
 	public void add(Project project){

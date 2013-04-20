@@ -18,18 +18,25 @@ import com.googlecode.chmcreator.ResourceLoader;
 import com.googlecode.chmcreator.bean.Project;
 
 public class MenubarBuilder {
+	private Display display;
+	private Shell shell;
+	public MenubarBuilder(final Display display, final Shell shell){
+		this.display = display;
+		this.shell = shell;
+	}
 
-	public static Menu createMenu(final Display display, final Shell shell){
+	public Menu build(Application application){
 		Menu bar = new Menu (shell, SWT.BAR|SWT.EMBEDDED);
-		fileMenu(display, shell, bar);
-		editorMenu(display, shell, bar);
-		searchMenu(display, shell, bar);
-		toolMenu(display, shell, bar);
-		helpMenu(display, shell, bar);
+		bar.setData(application);
+		fileMenu(bar);
+		editorMenu(bar);
+		searchMenu(bar);
+		toolMenu(bar);
+		helpMenu(bar);
 		return bar;
 	}
 	
-	private static void fileMenu(final Display display, final Shell shell, Menu bar){
+	private void fileMenu(final Menu bar){
 		MenuItem fileItem = new MenuItem (bar, SWT.CASCADE);
 		fileItem.setText ("&File");
 		Menu submenu = new Menu (shell, SWT.DROP_DOWN);
@@ -64,7 +71,10 @@ public class MenubarBuilder {
 				dialog.setFilterPath (platform.equals("win32") || platform.equals("wpf") ? "c:\\" : "/");
 				String fileName = dialog.open();
 				if(StringUtils.isNotBlank(fileName)){
-					Application.addEditor(ResourceLoader.getImage("java.gif"), fileName);
+					Application application = (Application)bar.getData();
+					
+					if(application!=null)
+						application.addEditor(ResourceLoader.getImage("java.gif"), fileName);
 				}
 			}
 		});
@@ -80,7 +90,8 @@ public class MenubarBuilder {
 				String fileName = dialog.open();
 				if(StringUtils.isNotBlank(fileName)){
 					Project project = new ProjectBuilder().build(fileName);
-					Application.addProject(project);
+					Application applicaton = (Application)bar.getData();
+					applicaton.getWorkspace().add(project);
 				}
 			}
 		});
@@ -96,7 +107,7 @@ public class MenubarBuilder {
 		item.setText ("Select &All\tCtrl+A");
 		item.setAccelerator (SWT.MOD1 + 'A');
 	}
-	private static void editorMenu(final Display display, final Shell shell, Menu bar){
+	private void editorMenu(Menu bar){
 		MenuItem fileItem = new MenuItem (bar, SWT.CASCADE);
 		fileItem.setText ("&Edit");
 		Menu submenu = new Menu (shell, SWT.DROP_DOWN);
@@ -148,7 +159,7 @@ public class MenubarBuilder {
 		item.setAccelerator (SWT.MOD1 + 'A');
 	}
 	
-	private static void searchMenu(final Display display, final Shell shell, Menu bar) {
+	private void searchMenu(Menu bar) {
 		MenuItem fileItem = new MenuItem (bar, SWT.CASCADE);
 		fileItem.setText ("&Search");
 		Menu submenu = new Menu (shell, SWT.DROP_DOWN);
@@ -199,7 +210,7 @@ public class MenubarBuilder {
 		item.setText ("Select &All\tCtrl+A");
 		item.setAccelerator (SWT.MOD1 + 'A');
 	}
-	private static void toolMenu(final Display display, final Shell shell, Menu bar) {
+	private void toolMenu(Menu bar) {
 		MenuItem fileItem = new MenuItem (bar, SWT.CASCADE);
 		fileItem.setText ("&Tool");
 		Menu submenu = new Menu (shell, SWT.DROP_DOWN);
@@ -251,7 +262,7 @@ public class MenubarBuilder {
 		item.setAccelerator (SWT.MOD1 + 'A');
 	}
 
-	private static void helpMenu(final Display display, final Shell shell, Menu bar) {
+	private void helpMenu(Menu bar) {
 		MenuItem fileItem = new MenuItem (bar, SWT.CASCADE);
 		fileItem.setText ("&Help");
 		Menu submenu = new Menu (shell, SWT.DROP_DOWN);

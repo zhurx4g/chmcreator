@@ -4,7 +4,6 @@ import java.io.File;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -15,11 +14,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.googlecode.chmcreator.CHM;
 import com.googlecode.chmcreator.bean.FileEntry;
 import com.googlecode.chmcreator.bean.Project;
 
 public class ProjectBuilder {
 
+	public ProjectBuilder(){
+		
+	}
+	
 	public Project build(String name, String path){
 		Project project = new Project(name, path);
 		parse(project,path);
@@ -68,7 +72,7 @@ public class ProjectBuilder {
 	private void parseDir(FileEntry parentEntry, Document document, Element parent, File dir){
 		String[] fileNames = dir.list();
 		for(String fileName:fileNames){
-			if("project.xml".equals(fileName)&&parentEntry instanceof Project){
+			if(CHM.PROJECT_NAME.equals(fileName)&&parentEntry instanceof Project){
 				continue;
 			}
 			Element entry = document.createElement("entry");

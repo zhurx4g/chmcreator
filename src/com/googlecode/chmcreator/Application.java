@@ -1,6 +1,5 @@
 package com.googlecode.chmcreator;
 
-import java.awt.Cursor;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
@@ -31,7 +30,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipsian.swt.composer.HyperComposer;
 
 import com.googlecode.chmcreator.bean.Project;
 import com.googlecode.chmcreator.bean.Workspace;
@@ -42,13 +40,13 @@ import com.googlecode.chmcreator.editor.HTMLEditor;
 
 public class Application {
 
-	public final static Display display = Display.getDefault();
-	public final static Shell shell = new Shell(display);
+	public final Display display = Display.getDefault();
+	public final Shell shell = new Shell(display);
 
-	public static CTabFolder tabEditor = null;
+	public CTabFolder tabEditor = null;
 	
-	public static Tree workspaceTree;
-	public static Workspace workspace = null;
+	public Tree workspaceTree;
+	public Workspace workspace = null;
 	
 	public static Properties settings = new Properties();
 
@@ -64,7 +62,7 @@ public class Application {
 		setTitle(settings.getProperty("title"));
 		
 		//menu
-		Menu menuBar = MenubarBuilder.createMenu(display, shell);
+		Menu menuBar = new MenubarBuilder(display, shell).build(this);
 		shell.setMenuBar (menuBar);
 		
 		Composite application = new Composite(shell,SWT.NONE);
@@ -110,7 +108,7 @@ public class Application {
 		}
 		
 		workspacePath = settings.getProperty("workspace.path");
-		workspace = new WorkspaceBuilder(workspacePath).build(workspaceTree);
+		workspace = new WorkspaceBuilder(workspacePath).build(this, workspaceTree);
 		
 		shell.open ();
 		while (!shell.isDisposed ()) {
@@ -118,7 +116,7 @@ public class Application {
 		}
 		display.dispose ();
 	}
-	public static void addProject(Project project){
+	public void addProject(Project project){
 		workspace.add(project);
 	}
 	public static Image getImage(String string) {
@@ -184,7 +182,7 @@ public class Application {
 	    return workspace;
 	}
 	
-	public static void addNavgatorTab(final Image image, final Composite parent, int count){
+	public void addNavgatorTab(final Image image, final Composite parent, int count){
 		final CTabFolder folder = new CTabFolder(parent, SWT.BORDER);
 		folder.setSimple(false);
 		folder.setBorderVisible(true);
@@ -252,15 +250,15 @@ public class Application {
 		});
 		folder.setSelection(0);
 	}
-	public static void addEditor(final Image image, String fileName){
+	public void addEditor(final Image image, String fileName){
+		File file = new File(fileName);
+		if(!file.exists()||file.isDirectory())
+			return;
+		
 		CTabItem item = new CTabItem(tabEditor, SWT.CLOSE);
 		item.setImage(image);
-		File file = new File(fileName);
 		item.setText(file.getName());
 		item.setToolTipText(fileName);
-//		HyperComposer composer = new HyperComposer(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-//		item.setControl(composer);
-//		composer.setCursor(Cursor.TEXT_CURSOR);
 		HTMLEditor htmlEditor = new HTMLEditor(tabEditor, SWT.BORDER|SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		try {
 			htmlEditor.setContent(FileUtils.readFileToString(file, "utf-8"));
@@ -268,7 +266,6 @@ public class Application {
 			e.printStackTrace();
 		}
 		item.setControl(htmlEditor);
-		System.out.println("ffffffffffffffffffffffffffffffffff");
 		setTitle(file.getName());
 		
 		tabEditor.setSelection(item);
@@ -308,11 +305,19 @@ public class Application {
 		}
 		settings.list(System.out);
 	}
-	public static synchronized void setTitle(String title){
+	public synchronized void setTitle(String title){
 		if(StringUtils.isBlank(title)){
 			shell.setText("Chmcreator");
 		}else{
 			shell.setText("Chmcreator - " + title);
 		}
+	}
+
+	public Workspace getWorkspace() {
+		return workspace;
+	}
+
+	public void setWorkspace(Workspace workspace) {
+		this.workspace = workspace;
 	}
 }
