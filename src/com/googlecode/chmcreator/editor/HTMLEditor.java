@@ -157,7 +157,6 @@ public class HTMLEditor extends Composite {
 		ToolItem newItem18 = newItem(toolBar, "editor/decfont.gif","Dec font");
 		newItem18.setData(HyperComposer.CMD_DECREASEFONT);
 		newItem18.addSelectionListener(listener);
-		
 	    toolBar.pack();
 	    Point size = toolBar.getSize();
 	    CoolItem item = new CoolItem(coolBar, SWT.NONE);
