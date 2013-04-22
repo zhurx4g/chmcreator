@@ -173,11 +173,6 @@ public class HTMLEditor extends Composite {
 		textData.top = new FormAttachment(coolBar);
 		textData.bottom = new FormAttachment(100);
 
-		户口卡
-		购房合同前5页 15.
-		购房发票
-		居住证明
-		身份证。
 		composer.setLayoutData(textData);
 		composer.setLayout(new FillLayout());
 		composer.setFlavour(HyperComposer.FLAVOUR_CSS);
