@@ -14,26 +14,26 @@ import org.apache.commons.io.FileUtils;
 import com.googlecode.chmcreator.bean.Project;
 
 public class HHPHelper {
-	private static Map<String, String> keywords = new HashMap<String, String>();
+	private static Map<String, String> HHC_KEYWORS = new HashMap<String, String>();
 	static {
-		keywords.put("extensens.projectName", "projectName");
+		HHC_KEYWORS.put("extensens.projectName", "projectName");
 		
-		keywords.put("options.binary.index", "Binary Index");
-		keywords.put("options.binary.toc", "Binary TOC");
-		keywords.put("options.compatibility", "Compatibility");
-		keywords.put("options.compiled.file", "Compiled file");
-		keywords.put("options.contents.file", "Contents file");
-		keywords.put("options.default.font", "Default Font");
-		keywords.put("options.default.topic", "Default topic");
-		keywords.put("options.display.compile.progress", "Display compile progress");
-		keywords.put("options.enhanced.decompilation", "Enhanced decompilation");
-		keywords.put("options.error.log.file", "Error log file");
-		keywords.put("options.flat", "Flat");
+		HHC_KEYWORS.put("options.binary.index", "Binary Index");
+		HHC_KEYWORS.put("options.binary.toc", "Binary TOC");
+		HHC_KEYWORS.put("options.compatibility", "Compatibility");
+		HHC_KEYWORS.put("options.compiled.file", "Compiled file");
+		HHC_KEYWORS.put("options.contents.file", "Contents file");
+		HHC_KEYWORS.put("options.default.font", "Default Font");
+		HHC_KEYWORS.put("options.default.topic", "Default topic");
+		HHC_KEYWORS.put("options.display.compile.progress", "Display compile progress");
+		HHC_KEYWORS.put("options.enhanced.decompilation", "Enhanced decompilation");
+		HHC_KEYWORS.put("options.error.log.file", "Error log file");
+		HHC_KEYWORS.put("options.flat", "Flat");
 		
-		keywords.put("options.full-text.search", "Full-text search");
-		keywords.put("options.index.file", "Index file");
-		keywords.put("options.language", "Language");
-		keywords.put("options.title", "Title");
+		HHC_KEYWORS.put("options.full-text.search", "Full-text search");
+		HHC_KEYWORS.put("options.index.file", "Index file");
+		HHC_KEYWORS.put("options.language", "Language");
+		HHC_KEYWORS.put("options.title", "Title");
 	}
 	
 	public static String getPath(Project project){
@@ -79,7 +79,7 @@ public class HHPHelper {
 		return true;
 	}
 	private static String getKey(Object key){
-		String val = keywords.get(key);
+		String val = HHC_KEYWORS.get(key);
 		return val==null?(String)key:val;
 	}
 }
